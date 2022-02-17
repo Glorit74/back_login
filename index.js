@@ -42,7 +42,7 @@ app.get('/api/todo', (req, res) => {
   const user = users.find(
     (user) => username === user.username && password === user.password
   );
-  if (!user) return resStatus(401);
+  if (!user) return res.sendStatus(401);
 
   return res.json(user.todoList);
 });
@@ -66,7 +66,21 @@ app.post('api/todo', (req, res) => {
   res.sendStatus(200);
 });
 
-const port = process.env.PORT || 4000;
+app.post('/api/login', (req, res) => {
+  const authHeader = req.header('Authorization');
+  if (!authHeader) return res.sendStatus(401);
+
+  const credential = authHeader.split('&&&');
+  const username = credential[0];
+  const password = credential[1];
+
+  const user = users.find(
+    (user) => username === user.username && password === user.password
+  );
+  if (!user) return res.sendStatus(401);
+
+  return res.sendStatus(200);
+});
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

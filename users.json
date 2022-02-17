@@ -1,5 +1,19 @@
 [
-  { "username": "Mari", "password": "jkl13" },
-  { "username": "Józsi", "password": "jkl13" },
-  { "username": "Klotild", "password": "ajkld12" }
+    {
+        "username": "Mari",
+        "password": "jkl13"
+    },
+    {
+        "username": "Józsi",
+        "password": "jkl13"
+    },
+    {
+        "username": "Klotild",
+        "password": "ajkld12"
+    },
+    {
+        "username": "alma",
+        "password": "1234",
+        "todoList": []
+    }
 ]

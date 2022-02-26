@@ -1,13 +1,16 @@
 const express = require('express');
-const fs = require('fs');
 const cors = require('cors');
-const users = require('./users');
+const fs = require('fs');
 
 const app = express();
 const port = 4000;
 
 app.use(cors());
 app.use(express.json());
+
+const users = require('./users.json');
+
+const sessions = {};
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
@@ -31,41 +34,6 @@ app.post('/api/signup', (req, res) => {
   res.sendStatus(200);
 });
 
-app.get('/api/todo', (req, res) => {
-  const authHeader = req.header('Authorization');
-  if (!authHeader) return res.sendStatus(401);
-
-  const credential = authHeader.split('&&&');
-  const username = credential[0];
-  const password = credential[1];
-
-  const user = users.find(
-    (user) => username === user.username && password === user.password
-  );
-  if (!user) return res.sendStatus(401);
-
-  return res.json(user.todoList);
-});
-
-app.post('api/todo', (req, res) => {
-  const authHeader = req.header('Authorization');
-  if (!authHeader) return res.sendStatus(401);
-
-  const credential = authHeader.split('&&&');
-  const username = credential[0];
-  const password = credential[1];
-
-  const user = users.find(
-    (user) => username === user.username && password === user.password
-  );
-  if (!user) return res.sendStatus(401);
-
-  if (!req.body.msg) return res.sendStatus(400);
-  user.todoList.push(req.body.msg);
-  fs.writeFileSync('./users.json', JSON.stringify(users, null, 4));
-  res.sendStatus(200);
-});
-
 app.post('/api/login', (req, res) => {
   const authHeader = req.header('Authorization');
   if (!authHeader) return res.sendStatus(401);
@@ -78,8 +46,71 @@ app.post('/api/login', (req, res) => {
     (user) => username === user.username && password === user.password
   );
   if (!user) return res.sendStatus(401);
+  let sessionId = Math.random().toString();
+  sessions[sessionId] = user; //összepárosítjuk a user-t ezzel az azonosítóval, ami key lesz, hozzá object formátumban kapcsolódik a user adat (username, password, todo)
+  console.log(sessions);
 
-  return res.sendStatus(200);
+  setTimeout(() => {
+    delete sessions[sessionId];
+    console.log('session end');
+  }, 30 * 1000); // after this period the sessionId is expired
+  res.json(sessionId);
+});
+
+app.get('/api/todo', (req, res) => {
+  //   const authHeader = req.header('Authorization');
+  //   if (!authHeader) return res.sendStatus(401);
+  // const credential = authHeader.split('&&&');
+  // const username = credential[0];
+  // const password = credential[1];
+  // ** username and password were sended in header
+
+  const sessionId = req.header('Authorization');
+  if (!sessionId) return res.sendStatus(401);
+
+  const sessionUser = sessions[sessionId];
+  //logged in user
+  if (!sessionUser) return res.sendStatus(401);
+
+  const username = sessionUser.username;
+  const password = sessionUser.password;
+
+  const user = users.find(
+    (user) => username === user.username && password === user.password
+  );
+  if (!user) return res.sendStatus(401);
+
+  return res.json(user.todoList);
+});
+
+app.post('api/todo', (req, res) => {
+  //   const authHeader = req.header('Authorization');
+  //   if (!authHeader) return res.sendStatus(401);
+
+  //   const credential = authHeader.split('&&&');
+  //   const username = credential[0];
+  //   const password = credential[1];
+
+  const sessionId = req.header('Authorization');
+  if (!sessionId) return res.sendStatus(401);
+
+  const sessionUser = sessions[sessionId];
+
+  if (!sessionUser) return res.sendStatus(401);
+
+  const username = sessionUser.username;
+  const password = sessionUser.password;
+
+  const user = users.find(
+    (user) => username === user.username && password === user.password
+  );
+  if (!user) return res.sendStatus(401);
+
+  if (!req.body.msg) return res.sendStatus(400);
+
+  user.todoList.push(req.body.msg);
+  fs.writeFileSync('./users.json', JSON.stringify(users, null, 4));
+  res.sendStatus(200);
 });
 
 app.listen(port, () => {

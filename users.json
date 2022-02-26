@@ -1,19 +1,26 @@
 [
     {
-        "username": "Mari",
-        "password": "jkl13"
+        "username": "teszt1",
+        "password": "123456"
     },
     {
-        "username": "Józsi",
-        "password": "jkl13"
+        "username": "teszt12",
+        "password": "123456",
+        "todoList": []
     },
     {
-        "username": "Klotild",
-        "password": "ajkld12"
+        "username": "laszloflora",
+        "password": "asdfg",
+        "todoList": []
     },
     {
-        "username": "alma",
-        "password": "1234",
+        "username": "user66",
+        "password": "user66",
+        "todoList": []
+    },
+    {
+        "username": "Glorit",
+        "password": "asdfg",
         "todoList": []
     }
 ]
